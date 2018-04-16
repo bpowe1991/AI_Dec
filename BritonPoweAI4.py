@@ -65,11 +65,11 @@ def determine_split(samples, num_attributes):
     gains_list = []
     global tested_attribute
 
-    print(tested_attribute)
+#    print(tested_attribute)
 
 
     for attribute in range(num_attributes):
-        if tested_attribute.__contains__(attribute) == False:
+#        if tested_attribute.__contains__(attribute) == False:
             print("Pass")
             gains_list.append(calculate_IG(samples, attribute))
 
@@ -96,7 +96,7 @@ def format_input(samples):
 
 
 
-
+#***** vars *****/
 
 testList = [[1,0,1,1],
             [0,0,1,1],
@@ -110,17 +110,34 @@ testList = [[1,0,1,1],
             [1,1,0,1]]
 
 
-testList = format_input(testList)
-tested_attribute = []
 
-split = determine_split(testList, 3)
-tested_attribute.append(split)
-print("Attribute", split, "has the best information gain")
+# main
 
-new_list1, new_list2 = has_attribute_split(testList, split)
+#traverse(testList);
+#printReport()
 
-print(new_list1, "\n"+str(new_list2))
 
-split = determine_split(new_list1, 3)
-tested_attribute.append(split)
-print("Attribute", split, "has the best information gain")
+
+# def traverse(tree){
+#     if (first){
+#         do extra stuff    
+#     }
+#     if (entropy == 0) return
+
+#     testList = format_input(testList)
+#     tested_attribute = []
+
+#     split = determine_split(testList, 3)
+#     tested_attribute.append(split)
+#     print("Attribute", split, "has the best information gain")
+
+#     new_list1, new_list2 = has_attribute_split(testList, split)
+
+#     print(new_list1, "\n"+str(new_list2))
+
+#     split = determine_split(new_list1, 3)
+#     tested_attribute.append(split)
+#     print("Attribute", split, "has the best information gain")
+
+#     traverse(modifiedTreeSubset)
+# }
