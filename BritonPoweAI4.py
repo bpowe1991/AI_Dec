@@ -18,7 +18,6 @@ def calculate_entropy(samples, parent_length):
     num_positive = 0
     num_negative = 0
 
-    print(num_samples)
 
     for sample in samples:
         if sample[len(sample)-1][1] == 1:
@@ -44,17 +43,13 @@ def calculate_entropy(samples, parent_length):
 
 
 def calculate_IG(samples, attribute):
-    parent_entropy = calculate_entropy(samples, len(samples))
-    print(parent_entropy)
     
+    parent_entropy = calculate_entropy(samples, len(samples))
     contains, excludes = has_attribute_split(samples, attribute)
 
     contains_entropy = calculate_entropy(contains, len(samples))
     excludes_entropy = calculate_entropy(excludes, len(samples))
-    print(contains, "\n"+str(excludes))
-    print(contains_entropy, "\n"+str(excludes_entropy))
     value_entropy = contains_entropy+excludes_entropy
-    print(value_entropy)
     info_gain = parent_entropy - value_entropy
 
     return info_gain
@@ -63,21 +58,19 @@ def calculate_IG(samples, attribute):
 def determine_split(samples, num_attributes):
     best_split = 0
     gains_list = []
-    global tested_attribute
 
 #    print(tested_attribute)
 
 
     for attribute in range(num_attributes):
 #        if tested_attribute.__contains__(attribute) == False:
-            print("Pass")
+
             gains_list.append(calculate_IG(samples, attribute))
 
+    print(gains_list)
     best_split = gains_list.index(max(gains_list))
 
-    print(gains_list)
-
-    return best_split
+    return samples[0][best_split][0]
 
 
 def format_input(samples):
@@ -92,9 +85,65 @@ def format_input(samples):
 
     return formated_list
 
+def remove_attribute(samples, attribute):
+    for each in samples:
+        del each[attribute]
 
+    return samples
 
+def determine_tree(samples, num_attributes):
 
+    print("Current List:")
+    for each in samples:
+        print(each)
+
+    print("\n\n")
+
+    
+    if calculate_entropy(samples, len(samples)) == 0:
+        print("Leaf Node")
+        return
+    
+    split = determine_split(samples, num_attributes)
+    
+    print("Current Split:")
+    print(split, "\n\n")
+
+    contains, not_contains = has_attribute_split(samples, split)
+    
+    print("Has Attribute List:")
+    for each in contains:
+        print(each)
+
+    print("\n\n")
+
+    print("Doesn't Has Attribute List:")
+    for each in not_contains:
+        print(each)
+    
+    print("\n\n")
+    
+    contains = remove_attribute(contains, split)
+    not_contains = remove_attribute(not_contains, split)
+    
+    print("Has Attribute List:")
+    for each in contains:
+        print(each)
+
+    print("\n\n")
+
+    
+    for each in not_contains:
+        print(each)
+
+    print("Going left")
+    determine_tree(contains, num_attributes-1)
+    print("Going right")
+    determine_tree(not_contains, num_attributes-1)
+
+    
+
+tested_attribute = []
 
 #***** vars *****/
 
@@ -108,6 +157,12 @@ testList = [[1,0,1,1],
             [1,1,0,0],
             [1,0,0,1],
             [1,1,0,1]]
+
+tested = []
+testList = format_input(testList)
+determine_tree(testList, 3)
+
+
 
 
 
