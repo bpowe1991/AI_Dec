@@ -27,5 +27,8 @@ class Tree():
     
     def setParent(self, parent):
         self.__parent_id = parent
+    
+    def getParent(self):
+        return self.__parent_id
 
 

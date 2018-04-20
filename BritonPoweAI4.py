@@ -122,19 +122,19 @@ def determine_tree(samples, num_attributes):
     global root
     if len(samples) == 0:
         print("Class: 0")
-        root.append(False)
+        root.append("N")
         return 
     if num_attributes == 0:
         if calculate_entropy(samples, len(samples)) == 1:
             print("Class: 1")
-            root.append(True)
+            root.append("Y")
             return 
     if calculate_entropy(samples, len(samples)) == 0.0:
         print("Class:", samples[0][-1][1])
         if samples[0][-1][1] == 1:
-            root.append(True)
+            root.append("Y")
         else:
-            root.append(False)
+            root.append("N")
         return 
     
     print("Number of Attributes Left:", num_attributes)
@@ -199,15 +199,42 @@ trace = Tree.Tree(root[0])
 
 root.pop(0)
 
-print(trace.getValue())
-current_node = trace
-print(root)
 
-for element in root:
-    while element != True or element != False:
-        current_node = Tree.Tree(element)
-        trace.setLeft(current_node)
-    break
+head = trace
+current_node = trace
+
+next_node = None
+print("Tree Start")
+print(current_node.getValue())
+for x in range(len(root)):
+    if (root[x] != "Y") and (root[x] != "N"):
+        next_node = Tree.Tree(root[x])
+        print(next_node.getValue())
+        next_node.setParent(current_node)
+        print(next_node.getParent().getValue())
+        current_node.setLeft(next_node)
+        print(current_node.getValue())
+        current_node = current_node.getLeft()
+    else:
+        print("Leaf Found")
+        next_node = Tree.Tree(root[x])
+        print(next_node.getValue())
+        next_node.setParent(current_node)
+        print(next_node.getParent().getValue())
+        current_node.setLeft(next_node)
+        print(current_node.getValue())
+        break
+
+
+print("\n\n\n\n\n")
+def printTree(tree):
+    print(tree)
+    if tree != None:
+        print(tree.getValue())
+        printTree(tree.getLeft())
+
+printTree(trace)
+
 
 
 
