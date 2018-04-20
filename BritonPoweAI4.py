@@ -195,6 +195,23 @@ previous_split = None
 determine_tree(sample_list, num_attributes)
 print(root)
 
+trace = Tree.Tree(root[0])
+
+root.pop(0)
+
+print(trace.getValue())
+current_node = trace
+print(root)
+
+for element in root:
+    while element != True or element != False:
+        current_node = Tree.Tree(element)
+        trace.setLeft(current_node)
+    break
+
+
+
+
 
 
 
