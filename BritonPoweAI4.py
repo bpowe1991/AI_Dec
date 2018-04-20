@@ -18,9 +18,10 @@ def has_attribute_split(samples, attribute):
 
 def calculate_entropy(samples, parent_length):
     
-    if len(samples) == 0:
+    if parent_length == 0:
         return 0
-    num_samples = len(samples)    
+    
+    num_samples = parent_length    
     num_positive = 0
     num_negative = 0
 
@@ -35,56 +36,58 @@ def calculate_entropy(samples, parent_length):
     prob_neg = float(num_negative/num_samples)
     entropy = 0
 
-    if prob_pos == 0 and prob_neg != 0:
-        entropy = (-1*prob_neg)*math.log2(prob_neg)
-    elif prob_neg == 0 and prob_pos != 0:
-        entropy = (-1*prob_pos)*math.log2(prob_pos)
-    elif prob_pos != 0 and prob_neg != 0:
+    #print("Number of Positive Tuples:", num_positive)
+    #print("Number of Negative Tuples:", num_negative)
+    #print("Number of Samples", parent_length)
+
+    if prob_pos != 0 and prob_neg != 0:
         entropy = ((-1*prob_pos)*math.log2(prob_pos))+((-1*prob_neg)*math.log2(prob_neg))
-    
 
-    entropy *= float(num_samples/parent_length)
-
+    #print("Entropy:", entropy)
     return entropy
 
 
 def calculate_IG(samples, attribute):
     
+    #print("Current Attribute:", attribute)
     parent_entropy = calculate_entropy(samples, len(samples))
+    #print("Parent Entropy:",parent_entropy)
     contains, excludes = has_attribute_split(samples, attribute)
-    contains_entropy = calculate_entropy(contains, len(samples))
-    excludes_entropy = calculate_entropy(excludes, len(samples))
+    #print("Contains Entropy:")
+    contains_entropy = (float(len(contains)/len(samples)))*calculate_entropy(contains, len(contains))
+    #print("Excludes Entropy:")
+    excludes_entropy = (float(len(excludes)/len(samples)))*calculate_entropy(excludes, len(excludes))
+    #print("Entropy of Contains",contains_entropy)
+    #print("Entropy of Excludes",excludes_entropy)
     value_entropy = contains_entropy+excludes_entropy
     info_gain = parent_entropy - value_entropy
+    #print("Info Gain:", info_gain)
 
     return info_gain
 
 
 def determine_split(samples, num_attributes):
     best_split = 0
-    gains_list = []
     remaining_attributes = []
+    highest_gain = -1.0
 
     sample = samples[0]
     for attribute in range(num_attributes):
         remaining_attributes.append(sample[attribute][0])
 
-    print(remaining_attributes)
-
-
-#    print(tested_attribute)
-
+    #print(remaining_attributes)
 
     for attribute in remaining_attributes:
-        print(attribute)
-        for each in samples:
-            print(each)
-        gains_list.append(calculate_IG(samples, attribute))
+        #print(attribute)
+        #for each in samples:
+            #print(each)
+        current_gain = calculate_IG(samples, attribute)
+        #print(current_gain)
+        if current_gain > highest_gain:
+            highest_gain = current_gain
+            best_split = attribute
 
-    print(gains_list)
-    best_split = gains_list.index(max(gains_list))
-
-    return samples[0][best_split][0]
+    return best_split
 
 
 def format_input(samples):
@@ -115,39 +118,42 @@ def remove_attribute(samples, attribute):
     return samples
 
 def determine_tree(samples, num_attributes):
+    if len(samples) == 0:
+        print("Class: 0")
+        return 0
+    if num_attributes == 0:
+        if calculate_entropy(samples, len(samples)) == 1:
+            print("Class: 1")
+            return 0
+    if calculate_entropy(samples, len(samples)) == 0.0:
+        print("Class:", samples[0][-1][1])
+        return samples[0][-1][1]
     
-    for each in samples:
-        print(each)
-    current_entropy = calculate_entropy(samples, len(samples))
-    if current_entropy == 0 or num_attributes == 0:
-        print("Leaf node(class):")
-        print(samples[0][-1][1])
-        return
-
+    print("Number of Attributes Left:", num_attributes)
     split = determine_split(samples, num_attributes)
 
-    print(split)
+    print("Splitting on", split)
 
-    has, has_not = has_attribute_split(sample_list, split)
+    has, has_not = has_attribute_split(samples, split)
+    
+    print('\n\nHas List:\n')
+    for each in has:
+        print(each)
+    print('Does not have List:\n')
+    for each in has_not:
+        print(each)
 
-    # print('\n\n')
-    # print(has)
-    # print('\n')
-    # print(has_not)
-
+    
     has = remove_attribute(has, split)
     has_not = remove_attribute(has_not, split)
 
-    print('\n\n')
-    print(has)
-    print('\n')
-    print(has_not)
-    print("Going left(has)")
+    
+    print("Going left(has)Left Child of",split)
     li1 = copy.deepcopy(has)
-    determine_tree(li1, num_attributes-1)
-    print("Going right(doesn't have)")
+    determine_tree(li1, (num_attributes-1))
+    print("Going right(doesn't have)Right Child of", split)
     li2 = copy.deepcopy(has_not)
-    determine_tree(li2, num_attributes-1)
+    determine_tree(li2, (num_attributes-1))
     
 #Opening input file called input.txt
 input = open('input.txt', 'r')
@@ -168,71 +174,14 @@ for line in input:
 
 #Formatting list
 sample_list = format_input(sample_list)
-        
-determine_tree(copy.deepcopy(sample_list), num_attributes)
 
-# print(split)
+for each in sample_list:
+    print(each)
 
-# has, has_not = has_attribute_split(has, split)
-# has = remove_attribute(has, split)
-# has_not = remove_attribute(has_not, split)
+print("\n\n")
 
-# print('\n\n')
-# print(has)
-# print('\n')
-# print(has_not)
-# print("Going left(has)")
-
-# current_entropy = calculate_entropy(has, len(has))
-
-# print(current_entropy)
-
-
-#determine_tree(sample_list, num_attributes)
+determine_tree(sample_list, num_attributes)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# main
-
-#traverse(testList);
-#printReport()
-
-
-
-# def traverse(tree){
-#     if (first){
-#         do extra stuff    
-#     }
-#     if (entropy == 0) return
-#     split = determine_split(testList, 3)
-#     print("Attribute", split, "has the best information gain")
-
-#     new_list1, new_list2 = has_attribute_split(testList, split)
-
-#     print(new_list1, "\n"+str(new_list2))
-
-#     split = determine_split(new_list1, 3)
-#     tested_attribute.append(split)
-#     print("Attribute", split, "has the best information gain")
-
-#     traverse(modifiedTreeSubset)
-# }
