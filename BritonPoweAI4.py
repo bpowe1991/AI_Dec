@@ -2,6 +2,7 @@ import math
 import copy
 from Tree import Tree
 
+
 def has_attribute_split(samples, attribute):
     has = []
     has_not = []
@@ -92,6 +93,7 @@ def format_input(samples):
 
     return formated_list
 
+
 def remove_attribute(samples, attribute):
     
     index = 0
@@ -106,6 +108,7 @@ def remove_attribute(samples, attribute):
         
 
     return samples
+
 
 def determine_tree(samples, num_attributes):
     global pre_order, in_order
@@ -167,11 +170,11 @@ def construct_tree(in_order, pre_order, start_index, end_index):
     return node
 
 
-
 def search_value(in_order, start_value, end_value, value):
     for index in range(start_value, end_value+1):
         if in_order[index] == value:
             return index
+
 
 def printTree(tree):
     global head
@@ -190,15 +193,38 @@ def printTree(tree):
         printTree(tree.getRight())
 
 
-#Opening input file called input.txt
-input = open('input.txt', 'r')
+def determine_class(sample):
+    global head
+    pointer = head
+    while pointer.getValue() != "Y" and pointer.getValue() != "N":
+        if sample[pointer.getValue()-1][1] == 1:
+            pointer = pointer.getLeft()
+        else:
+            pointer = pointer.getRight()
+    
+    if pointer.getValue() == "Y":
+        print("Class is 1 - (True)")
+    else:
+        print("Class is 0 - (False)")
 
+filename = None
+
+while filename is None:
+    try:
+        filename = input("Please enter the name of the input file: ")
+        
+        #Opening input file called input.txt
+        input_data = open(filename, 'r')
+    except OSError:
+        print('\nError accessing file. Enter the correct filename with extension.\n\n')
+        filename = None
+    
 
 construct_tree.starter = 0
 
 #Getting parameters of input
 sample_list = []
-parameters = input.readline()
+parameters = input_data.readline()
 parameters = parameters.split()
 
 #Setting numbeer of attributes and number of samples
@@ -206,7 +232,7 @@ num_attributes = int(parameters[0])
 num_samples = int(parameters[1])
 
 #Creating input sample list
-for line in input:
+for line in input_data:
     line = line.rstrip('\n')
     sample_list.append(line.split())
 
@@ -227,23 +253,29 @@ determine_tree(sample_list, num_attributes)
 
 head = construct_tree(in_order, pre_order, 0, len(in_order)-1)
 
+
+print(":::Tree Structure:::")
 printTree(head)
 
-def determine_class(sample):
-    global head
-    pointer = head
-    while pointer.getValue() != "Y" and pointer.getValue() != "N":
-        if sample[pointer.getValue()-1][1] == 1:
-            pointer = pointer.getLeft()
-        else:
-            pointer = pointer.getRight()
-    
-    if pointer.getValue() == "Y":
-        print("Class is 1 - (True)")
-    else:
-        print("Class is 0 - (False)")
+test_sample = []
+for x in range(1, num_attributes+1):
+    user_input = None
 
-determine_class([(1,1),(2,1),(3,0),(4,0),(5,1),(6,1),(7,1),(8,1),(9,0),(10,1)])
+    while user_input is None:
+        try:
+            user_input = input("Please Enter the value for Attribute ("+str(x)+"):")
+            user_input = int(user_input)
+            if user_input != 1 and user_input != 0:
+                print("\nError! Please enter either 1 or 0")
+                user_input = None
+            else:
+                test_sample.append((x, user_input))
+        except ValueError:
+            print("\nError! Please enter either 1 or 0")
+
+
+
+determine_class(test_sample)
 
 
 
