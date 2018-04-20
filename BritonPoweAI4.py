@@ -1,6 +1,6 @@
 import math
 import copy
-
+import Tree
 def has_attribute_split(samples, attribute):
     has = []
     has_not = []
