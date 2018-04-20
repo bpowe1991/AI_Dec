@@ -1,6 +1,7 @@
 import math
 import copy
 import Tree
+
 def has_attribute_split(samples, attribute):
     has = []
     has_not = []
@@ -118,20 +119,27 @@ def remove_attribute(samples, attribute):
     return samples
 
 def determine_tree(samples, num_attributes):
+    global root
     if len(samples) == 0:
         print("Class: 0")
-        return 0
+        root.append(False)
+        return 
     if num_attributes == 0:
         if calculate_entropy(samples, len(samples)) == 1:
             print("Class: 1")
-            return 0
+            root.append(True)
+            return 
     if calculate_entropy(samples, len(samples)) == 0.0:
         print("Class:", samples[0][-1][1])
-        return samples[0][-1][1]
+        if samples[0][-1][1] == 1:
+            root.append(True)
+        else:
+            root.append(False)
+        return 
     
     print("Number of Attributes Left:", num_attributes)
     split = determine_split(samples, num_attributes)
-
+    root.append(split)
     print("Splitting on", split)
 
     has, has_not = has_attribute_split(samples, split)
@@ -152,8 +160,10 @@ def determine_tree(samples, num_attributes):
     li1 = copy.deepcopy(has)
     determine_tree(li1, (num_attributes-1))
     print("Going right(doesn't have)Right Child of", split)
+    root.append(split)
     li2 = copy.deepcopy(has_not)
     determine_tree(li2, (num_attributes-1))
+
     
 #Opening input file called input.txt
 input = open('input.txt', 'r')
@@ -180,7 +190,10 @@ for each in sample_list:
 
 print("\n\n")
 
+root = []
+previous_split = None
 determine_tree(sample_list, num_attributes)
+print(root)
 
 
 
