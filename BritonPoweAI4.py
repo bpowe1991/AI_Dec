@@ -1,6 +1,6 @@
 import math
 import copy
-import Tree
+from Tree import Tree
 
 def has_attribute_split(samples, attribute):
     has = []
@@ -37,32 +37,25 @@ def calculate_entropy(samples, parent_length):
     prob_neg = float(num_negative/num_samples)
     entropy = 0
 
-    #print("Number of Positive Tuples:", num_positive)
-    #print("Number of Negative Tuples:", num_negative)
-    #print("Number of Samples", parent_length)
-
     if prob_pos != 0 and prob_neg != 0:
         entropy = ((-1*prob_pos)*math.log2(prob_pos))+((-1*prob_neg)*math.log2(prob_neg))
 
-    #print("Entropy:", entropy)
     return entropy
 
 
 def calculate_IG(samples, attribute):
     
-    #print("Current Attribute:", attribute)
     parent_entropy = calculate_entropy(samples, len(samples))
-    #print("Parent Entropy:",parent_entropy)
+
     contains, excludes = has_attribute_split(samples, attribute)
-    #print("Contains Entropy:")
+
     contains_entropy = (float(len(contains)/len(samples)))*calculate_entropy(contains, len(contains))
-    #print("Excludes Entropy:")
+
     excludes_entropy = (float(len(excludes)/len(samples)))*calculate_entropy(excludes, len(excludes))
-    #print("Entropy of Contains",contains_entropy)
-    #print("Entropy of Excludes",excludes_entropy)
+
     value_entropy = contains_entropy+excludes_entropy
     info_gain = parent_entropy - value_entropy
-    #print("Info Gain:", info_gain)
+
 
     return info_gain
 
@@ -76,14 +69,10 @@ def determine_split(samples, num_attributes):
     for attribute in range(num_attributes):
         remaining_attributes.append(sample[attribute][0])
 
-    #print(remaining_attributes)
-
     for attribute in remaining_attributes:
-        #print(attribute)
-        #for each in samples:
-            #print(each)
+
         current_gain = calculate_IG(samples, attribute)
-        #print(current_gain)
+
         if current_gain > highest_gain:
             highest_gain = current_gain
             best_split = attribute
@@ -119,54 +108,93 @@ def remove_attribute(samples, attribute):
     return samples
 
 def determine_tree(samples, num_attributes):
-    global root
+    global pre_order, in_order
+
     if len(samples) == 0:
-        print("Class: 0")
-        root.append("N")
+        pre_order.append("N")
+        in_order.append("N")
         return 
     if num_attributes == 0:
         if calculate_entropy(samples, len(samples)) == 1:
-            print("Class: 1")
-            root.append("Y")
+
+            pre_order.append("Y")
+            in_order.append("Y")
             return 
     if calculate_entropy(samples, len(samples)) == 0.0:
-        print("Class:", samples[0][-1][1])
         if samples[0][-1][1] == 1:
-            root.append("Y")
+            pre_order.append("Y")
+            in_order.append("Y")
         else:
-            root.append("N")
+            pre_order.append("N")
+            in_order.append("N")
         return 
     
-    print("Number of Attributes Left:", num_attributes)
+
     split = determine_split(samples, num_attributes)
-    root.append(split)
-    print("Splitting on", split)
 
     has, has_not = has_attribute_split(samples, split)
-    
-    print('\n\nHas List:\n')
-    for each in has:
-        print(each)
-    print('Does not have List:\n')
-    for each in has_not:
-        print(each)
-
     
     has = remove_attribute(has, split)
     has_not = remove_attribute(has_not, split)
 
+    pre_order.append(split)
     
-    print("Going left(has)Left Child of",split)
     li1 = copy.deepcopy(has)
     determine_tree(li1, (num_attributes-1))
-    print("Going right(doesn't have)Right Child of", split)
-    root.append(split)
+    
+    in_order.append(split)
+
     li2 = copy.deepcopy(has_not)
     determine_tree(li2, (num_attributes-1))
 
+
+def construct_tree(in_order, pre_order, start_index, end_index):
+
+    if start_index > end_index:
+        return None
+
+    node = Tree(pre_order[construct_tree.starter])
+    construct_tree.starter += 1
+
+    if start_index == end_index:
+        return node
+
+    index = search_value(in_order, start_index, end_index, node.getValue())
+
+    node.setLeft(construct_tree(in_order, pre_order, start_index, index-1))
+    node.setRight(construct_tree(in_order, pre_order, index+1, end_index))
     
+    return node
+
+
+
+def search_value(in_order, start_value, end_value, value):
+    for index in range(start_value, end_value+1):
+        if in_order[index] == value:
+            return index
+
+def printTree(tree):
+    global head
+    if tree != None:
+        if tree.getValue() == head.getValue():
+            print("::Root::")
+        if tree.getValue() == "Y" or tree.getValue() == "N":
+            print("::Leaf::")
+        print("Current Node:", tree.getValue())
+        if tree.getLeft() != None:
+            print("Left Child:", tree.getLeft().getValue())
+        if tree.getRight() != None:
+            print("Right Child:", tree.getRight().getValue())
+        print("\n")
+        printTree(tree.getLeft())
+        printTree(tree.getRight())
+
+
 #Opening input file called input.txt
 input = open('input.txt', 'r')
+
+
+construct_tree.starter = 0
 
 #Getting parameters of input
 sample_list = []
@@ -182,63 +210,40 @@ for line in input:
     line = line.rstrip('\n')
     sample_list.append(line.split())
 
+print("Input Sample List:")
+for each in sample_list:
+    print(each)
+print("\n")
+
 #Formatting list
 sample_list = format_input(sample_list)
 
-for each in sample_list:
-    print(each)
 
-print("\n\n")
 
-root = []
-previous_split = None
+in_order = []
+pre_order = []
+
 determine_tree(sample_list, num_attributes)
-print(root)
 
-trace = Tree.Tree(root[0])
+head = construct_tree(in_order, pre_order, 0, len(in_order)-1)
 
-root.pop(0)
+printTree(head)
 
-
-head = trace
-current_node = trace
-
-next_node = None
-print("Tree Start")
-print(current_node.getValue())
-for x in range(len(root)):
-    if (root[x] != "Y") and (root[x] != "N"):
-        next_node = Tree.Tree(root[x])
-        print(next_node.getValue())
-        next_node.setParent(current_node)
-        print(next_node.getParent().getValue())
-        current_node.setLeft(next_node)
-        print(current_node.getValue())
-        current_node = current_node.getLeft()
+def determine_class(sample):
+    global head
+    pointer = head
+    while pointer.getValue() != "Y" and pointer.getValue() != "N":
+        if sample[pointer.getValue()-1][1] == 1:
+            pointer = pointer.getLeft()
+        else:
+            pointer = pointer.getRight()
+    
+    if pointer.getValue() == "Y":
+        print("Class is 1 - (True)")
     else:
-        print("Leaf Found")
-        next_node = Tree.Tree(root[x])
-        print(next_node.getValue())
-        next_node.setParent(current_node)
-        print(next_node.getParent().getValue())
-        current_node.setLeft(next_node)
-        print(current_node.getValue())
-        break
+        print("Class is 0 - (False)")
 
-
-print("\n\n\n\n\n")
-def printTree(tree):
-    print(tree)
-    if tree != None:
-        print(tree.getValue())
-        printTree(tree.getLeft())
-
-printTree(trace)
-
-
-
-
-
+determine_class([(1,1),(2,1),(3,0),(4,0),(5,1),(6,1),(7,1),(8,1),(9,0),(10,1)])
 
 
 
